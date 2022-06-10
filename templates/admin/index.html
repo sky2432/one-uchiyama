@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+
+{% block body %}
+<h1>Admin</h1>
+<form action="{% url 'admin' %}" method="POST" enctype='multipart/form-data'>
+  {% csrf_token %}
+  <p>
+    <div><label for="">ID</label></div>
+    <input type="number" name="id">
+  </p>
+  <p>
+    <div><label for="">オーディオファイル</label></div>
+    <input type="file" name="audio_file">
+  </p>
+  <p><input type="submit" value="登録"></p>
+</form>
+{% endblock body %}
