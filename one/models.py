@@ -2,7 +2,8 @@ from django.db import models
 
 
 class Radio(models.Model):
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, unique=True)
+    english_title = models.CharField(max_length=255, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -26,7 +27,7 @@ class Episode(models.Model):
         ]
 
     def __str__(self):
-        return str(self.id)
+        return str(self.radio_id.title) + '：' + str(self.id) + '回目'
 
 
 class Word(models.Model):

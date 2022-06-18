@@ -6,8 +6,12 @@
 <form action="{% url 'admin' %}" method="POST" enctype='multipart/form-data'>
   {% csrf_token %}
   <p>
-    <div><label for="">ID</label></div>
+    <div><label for="">ラジオID</label></div>
     <input type="number" name="id">
+  </p>
+  <p>
+    <div><label for="">回</label></div>
+    <input type="number" name="number">
   </p>
   <p>
     <div><label for="">オーディオファイル</label></div>

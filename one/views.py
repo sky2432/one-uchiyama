@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db import transaction
-from .models import Episode
+from .models import Radio, Episode
 from .service.aws import transcribe_file, getS3PathFromUrl
 
 
@@ -24,9 +24,12 @@ def admin(request):
 def admin_post(request):
     with transaction.atomic():
         episode = Episode.objects.create(
-            id=request.POST['id'],
+            radio_id=get_object_or_404(Radio, pk=request.POST['id']),
+            number=request.POST['number'],
             audio_file=request.FILES['audio_file'],
         )
+        print(episode.radio_id.english_title)
         file_url = transcribe_file(
-            'one-job', getS3PathFromUrl(episode.audio_file.url)
+            episode.radio_id.english_title + '_' + episode.number,
+            getS3PathFromUrl(episode.audio_file.url)
         )
