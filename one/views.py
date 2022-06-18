@@ -18,7 +18,7 @@ def admin(request):
         admin_post(request)
         return redirect('top')
     else:
-        return render(request, 'admin/index.html')
+        return render(request, 'admin/store.html')
 
 
 def admin_post(request):
