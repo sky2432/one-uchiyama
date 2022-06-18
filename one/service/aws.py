@@ -1,6 +1,7 @@
 import time
 import boto3
 import environ
+import requests
 
 
 env = environ.Env()
@@ -14,14 +15,15 @@ def getS3PathFromUrl(url):
     return 's3://' + env.str('AWS_STORAGE_BUCKET_NAME') + url[start_index:end_index]
 
 
-def transcribe_file(job_name, file_uri):
+def transcribe_file(job_name, file_uri, vocabulary_name):
     transcribe_client = boto3.client('transcribe')
 
     transcribe_client.start_transcription_job(
         TranscriptionJobName=job_name,
         Media={'MediaFileUri': file_uri},
         MediaFormat='mp3',
-        LanguageCode='ja-JP'
+        LanguageCode='ja-JP',
+        Settings={'VocabularyName': vocabulary_name},
     )
 
     max_tries = 1000
@@ -43,3 +45,8 @@ def transcribe_file(job_name, file_uri):
         else:
             print(f"Waiting for {job_name}. Current status is {job_status}.")
         time.sleep(10)
+
+
+def get_transcript(file_url):
+    r = requests.get(file_url, stream=True).json()
+    return r['results']['transcripts'][0]['transcript']
