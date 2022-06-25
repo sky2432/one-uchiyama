@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db import transaction
+from django.db.models import Q
 from .models import Radio, Episode, Word
 from .service.aws import transcribe_file, getS3PathFromUrl, get_transcript
 from .service.util import parse
@@ -7,6 +8,16 @@ from .service.util import parse
 
 def top(request):
     return render(request, 'top.html')
+
+
+def search(request):
+    if request.method == 'POST':
+        keyword = request.POST['keyword']
+        episodes = Episode.objects.filter(
+            Q(word__original_form__contains=keyword) | Q(word__pronunciation__contains=keyword))
+        return render(request, 'search.html', {'episodes': episodes})
+    else:
+        return redirect('top')
 
 
 def detail(request, pk):
@@ -28,6 +39,7 @@ def admin_post(request):
             radio_id=get_object_or_404(Radio, pk=request.POST['id']),
             number=request.POST['number'],
             audio_file=request.FILES['audio_file'],
+            air_date=request.POST['air_date'],
         )
         english_title = episode.radio_id.english_title
         file_url = transcribe_file(
@@ -44,6 +56,6 @@ def store_words(words, episode):
     for word in words:
         Word.objects.create(
             episode_id=episode,
-            surface=word['surface'],
+            original_form=word['original_form'],
             pronunciation=word['pronunciation'],
         )

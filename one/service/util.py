@@ -11,7 +11,7 @@ def parse(text):
         p = split[0]
         p2 = split[1]
         if p == '名詞' and p2 in ['一般', '固有名詞']:
-            word = {'surface': split[6], 'pronunciation': split[7]}
+            word = {'original_form': split[6], 'pronunciation': split[7]}
             words.append(word)
         node = node.next
     return words

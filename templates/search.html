@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<h1>search result</h1>
+
+{% for episode in episodes %}
+<img src="{{ episode.radio_id.image.url }}" width="100px" alt="">
+<p>{{ episode.radio_id.title }}#{{ episode.number }}</p>
+<p>{{ episode.air_date }}</p>
+{% endfor %}
+
+{% endblock body %}

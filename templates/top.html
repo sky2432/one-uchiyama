@@ -2,4 +2,12 @@
 
 {% block body %}
 <h1>Top</h1>
+<form action="{% url 'search' %}" method="POST">
+  {% csrf_token %}
+  <p>
+  <div><label for="">キーワード</label></div>
+  <input type="text" name="keyword">
+  </p>
+  <p><input type="submit" value="検索"></p>
+</form>
 {% endblock body %}
