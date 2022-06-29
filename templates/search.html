@@ -1,12 +1,21 @@
 {% extends 'base.html' %}
 
 {% block body %}
-<h1>search result</h1>
-
-{% for episode in episodes %}
-<img src="{{ episode.radio_id.image.url }}" width="100px" alt="">
-<p>{{ episode.radio_id.title }}#{{ episode.number }}</p>
-<p>{{ episode.air_date }}</p>
-{% endfor %}
-
+<div class="container mx-auto my-8">
+  {% if not episodes %}
+  <p class="text-center">一致する回はありません。</p>
+  {% else %}
+  {% for episode in episodes %}
+  <div class="flex pb-4 mb-4 border-b">
+    <img class="w-[100px] rounded-md" src="{{ episode.radio_id.image.url }}" alt="">
+    <div class="flex items-center">
+      <div class="ml-2">
+        <p>{{ episode.radio_id.title }}#{{ episode.number }}</p>
+        <p>{{ episode.air_date }}</p>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+  {% endif %}
+</div>
 {% endblock body %}

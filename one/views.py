@@ -14,7 +14,7 @@ def search(request):
     if request.method == 'POST':
         keyword = request.POST['keyword']
         episodes = Episode.objects.filter(
-            Q(word__original_form__contains=keyword) | Q(word__pronunciation__contains=keyword))
+            Q(word__original_form__contains=keyword) | Q(word__pronunciation__contains=keyword)).distinct()
         return render(request, 'search.html', {'episodes': episodes})
     else:
         return redirect('top')

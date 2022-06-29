@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
+import environ
 from pathlib import Path
 
 
@@ -17,7 +18,6 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # 環境変数の設定
-import environ
 
 env = environ.Env()
 env.read_env('.env')
@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'one.apps.OneConfig',
-    'django_cleanup.apps.CleanupConfig'
+    'django_cleanup.apps.CleanupConfig',
+    'debug_toolbar',
 ]
 
 MIDDLEWARE = [
@@ -55,6 +56,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
 ROOT_URLCONF = 'one_uchiyama.urls'
@@ -123,6 +125,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
@@ -136,3 +141,7 @@ AWS_SECRET_ACCESS_KEY = env.str('AWS_SECRET_ACCESS_KEY')
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 AWS_STORAGE_BUCKET_NAME = env.str('AWS_STORAGE_BUCKET_NAME')
 AWS_S3_REGION_NAME = env.str('AWS_S3_REGION_NAME')
+
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
