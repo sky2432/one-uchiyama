@@ -24,7 +24,8 @@ class Episode(models.Model):
     audio_file = models.FileField(
         verbose_name="音声ファイル", upload_to='audio_file')
     air_date = models.DateField(verbose_name="放送日")
-    spotify_id = models.CharField(verbose_name="SpotifyID", max_length=255, null=True)
+    spotify_id = models.CharField(
+        verbose_name="SpotifyID", max_length=255, null=True, blank=True)
     created_at = models.DateTimeField(verbose_name="作成日時", auto_now_add=True)
     updated_at = models.DateTimeField(verbose_name="更新日時", auto_now=True)
 
