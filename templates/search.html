@@ -15,13 +15,21 @@
   {% else %}
   {% for episode in episodes %}
   <div class="flex pb-4 mb-4 border-b">
-    <img class="w-[100px] rounded-md" src="{{ episode.radio_id.image.url }}" alt="">
+    {% if episode.spotify_id %}
+    <iframe style="border-radius:12px"
+      src="https://open.spotify.com/embed/episode/{{ episode.spotify_id }}?utm_source=generator" width="100%" height="152"
+      frameBorder="0" allowfullscreen=""
+      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture">
+    </iframe>
+    {% else %}
+    <img class="h-[152px] rounded-md" src="{{ episode.radio_id.image.url }}" alt="">
     <div class="flex items-center">
       <div class="ml-2">
         <p>{{ episode.radio_id.title }}#{{ episode.number }}</p>
         <p>{{ episode.air_date|date:"Y-m-d" }}</p>
       </div>
     </div>
+    {% endif %}
   </div>
   {% endfor %}
   {% endif %}
