@@ -1,5 +1,13 @@
 {% extends 'base.html' %}
 
+
+{% block header %}
+<header class="w-full h-[70px] bg-white drop-shadow flex items-center justify-center">
+  {% include './components/search-form.html' with keyword=keyword %}
+</header>
+{% endblock header %}
+
+
 {% block body %}
 <div class="container mx-auto my-8">
   {% if not episodes %}
@@ -11,7 +19,7 @@
     <div class="flex items-center">
       <div class="ml-2">
         <p>{{ episode.radio_id.title }}#{{ episode.number }}</p>
-        <p>{{ episode.air_date }}</p>
+        <p>{{ episode.air_date|date:"Y-m-d" }}</p>
       </div>
     </div>
   </div>
