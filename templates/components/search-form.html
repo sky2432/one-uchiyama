@@ -1,4 +1,4 @@
-<form action="{% url 'search' %}" method="POST" class="inline-block">
+<form action="{% url 'search' %}" method="GET" class="inline-block">
   {% csrf_token %}
   <div class="relative">
     <i class="fas fa-search absolute top-[5px] left-2 text-gray-500"></i>
