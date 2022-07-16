@@ -7,8 +7,7 @@ import uuid
 
 class EpisodeAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
-        """
-        管理画面でエピソードを保存する。
+        """管理画面でエピソードを保存する。
 
         新規保存のとき
         またはオーディオファイルが変更された場合は、文字起こしを行い、単語を保存する。
@@ -29,7 +28,7 @@ class EpisodeAdmin(admin.ModelAdmin):
             get_words(obj)
 
 
-async def get_words(episode):
+def get_words(episode):
     english_title = episode.radio_id.english_title
     uuid4 = str(uuid.uuid4())
     file_url = transcribe_file(
