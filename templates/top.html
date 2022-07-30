@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<div class="mt-24">
+  <h1 class="text-xl text-center">内山昂輝の1クール！のあの回</h1>
+  <div class="text-center mt-4">
+    {% include './components/search-form.html' with keyword=keyword %}
+  </div>
+</div>
+{% endblock body %}

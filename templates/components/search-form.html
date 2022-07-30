@@ -1,0 +1,7 @@
+<form action="{% url 'search' %}" method="GET" class="inline-block">
+  {% csrf_token %}
+  <div class="relative">
+    <i class="fas fa-search absolute top-[5px] left-2 text-gray-500"></i>
+    <input type="text" name="keyword" value="{{ keyword }}" class="border border-gray-300 rounded-l-full rounded-r-full pl-8 pr-2 text-gray-500">
+  </div>
+</form>
