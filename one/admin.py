@@ -1,8 +1,13 @@
 from django.contrib import admin
 from .models import Radio, Episode, Word
-from .service.aws import transcribe_file, getS3PathFromUrl, get_transcript
+from .service.aws import transcribe_file, get_s3_path_from_url, get_transcript_from_s3
 from .service.util import parse
 import uuid
+import environ
+
+
+env = environ.Env()
+env.read_env('.env')
 
 
 class EpisodeAdmin(admin.ModelAdmin):
@@ -14,10 +19,10 @@ class EpisodeAdmin(admin.ModelAdmin):
         """
         episode = Episode.objects.filter(id=obj.id)
         if len(episode) == 0:
-            print('new')
+            print('new model')
             is_store = True
         elif obj.audio_file != episode[0].audio_file:
-            print('edit')
+            print('edit model')
             is_store = True
             Word.objects.filter(episode_id=episode[0].id).delete()
         else:
@@ -30,13 +35,14 @@ class EpisodeAdmin(admin.ModelAdmin):
 
 def get_words(episode):
     english_title = episode.radio_id.english_title
-    uuid4 = str(uuid.uuid4())
+    job_name = english_title + '_' + \
+        str(episode.number) + '_' + str(uuid.uuid4())
     file_url = transcribe_file(
-        english_title + '_' + str(episode.number) + '_' + uuid4,
-        getS3PathFromUrl(episode.audio_file.url,),
+        job_name,
+        get_s3_path_from_url(episode.audio_file.url,),
         english_title
     )
-    transcript = get_transcript(file_url)
+    transcript = get_transcript_from_s3(file_url)
     words = parse(transcript)
     store_words(words, episode)
 

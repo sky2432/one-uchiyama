@@ -1,14 +1,21 @@
 import time
 import boto3
 import environ
-import requests
-
+import json
 
 env = environ.Env()
 env.read_env('.env')
 
 
-def getS3PathFromUrl(url):
+def get_s3_path_from_url(url):
+    """S3URLからS3パスを取得する
+
+    Args:
+        url (string) :S3URL
+
+    Returns:
+        string: S3パス
+    """
     domain = 's3.amazonaws.com'
     start_index = url.find(domain) + len(domain)
     end_index = url.find('?')
@@ -16,6 +23,16 @@ def getS3PathFromUrl(url):
 
 
 def transcribe_file(job_name, file_uri, vocabulary_name):
+    """音声ファイルを文字起こしする
+
+    Args:
+        job_name (string): ジョブ名
+        file_uri (string): 対象音声ファイルのs3ファイルパス
+        vocabulary_name (string): ボキャブラリー名
+
+    Returns:
+        string: 文字起こしファイルURL
+    """
     transcribe_client = boto3.client('transcribe')
 
     transcribe_client.start_transcription_job(
@@ -24,6 +41,8 @@ def transcribe_file(job_name, file_uri, vocabulary_name):
         MediaFormat='mp3',
         LanguageCode='ja-JP',
         Settings={'VocabularyName': vocabulary_name},
+        OutputBucketName=env.str('AWS_TRANSCRIBE_OUTPUT_BUCKET_NAME'),
+        OutputKey=env.str('AWS_TRANSCRIBE_OUTPUT_KEY'),
     )
 
     max_tries = 1000
@@ -47,6 +66,29 @@ def transcribe_file(job_name, file_uri, vocabulary_name):
         time.sleep(10)
 
 
-def get_transcript(file_url):
-    r = requests.get(file_url, stream=True).json()
+def get_transcript_from_s3(url):
+    s3 = boto3.resource('s3')
+    key = get_s3_file_key_from_s3_url(url)
+    object = s3.Object(env.str('AWS_TRANSCRIBE_OUTPUT_BUCKET_NAME'), key)
+    body = object.get()['Body'].read()
+    r = json.loads(body)
     return r['results']['transcripts'][0]['transcript']
+
+
+def get_s3_file_key_from_s3_url(url):
+    """S3URLからファイルキーを取得する
+
+    example:
+    url = 'https://s3.ap-northeast-1.amazonaws.com/one-uchiyama/transcribe_file/one-uchiyama_0_a12bf05c-81a8-4afd-8f71-b0088ecc8cff.json'
+
+    return 'transcribe_file/one-uchiyama_0_a12bf05c-81a8-4afd-8f71-b0088ecc8cff.json'
+
+    Args:
+        url (string): S3URL
+
+    Returns:
+        string: S3ファイルキー
+    """
+    bucket_name = env.str('AWS_TRANSCRIBE_OUTPUT_BUCKET_NAME') + '/'
+    start_index = url.find(bucket_name) + len(bucket_name)
+    return url[start_index:]
