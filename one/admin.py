@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Radio, Episode, Word
+from .models import Radio, Episode, Word, TemporaryWord
 from .service.aws import transcribe_file, get_s3_path_from_url, get_transcript_from_s3
 from .service.util import parse
 import uuid
@@ -59,3 +59,4 @@ def store_words(words, episode):
 admin.site.register(Radio)
 admin.site.register(Episode, EpisodeAdmin)
 admin.site.register(Word)
+admin.site.register(TemporaryWord)
