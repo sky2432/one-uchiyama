@@ -1,10 +1,8 @@
 from django.contrib import admin
 from .models import Radio, Episode, Word
 from .service.aws import transcribe_file, get_s3_path_from_url, get_transcript_json_from_s3, get_transcript_from_json
-from .service.util import parse
-import uuid
+from .service.util import parse, now_datetime
 import environ
-
 
 env = environ.Env()
 env.read_env('.env')
@@ -36,7 +34,7 @@ class EpisodeAdmin(admin.ModelAdmin):
 def get_words(episode):
     english_title = episode.radio_id.english_title
     job_name = english_title + '_' + \
-        str(episode.number) + '_' + str(uuid.uuid4())
+        str(episode.number) + '_' + now_datetime()
     file_url = transcribe_file(
         job_name,
         get_s3_path_from_url(episode.audio_file.url,),

@@ -1,4 +1,5 @@
 import MeCab
+import datetime
 
 
 def parse(text):
@@ -19,3 +20,12 @@ def parse(text):
             words.append(word)
         node = node.next
     return words
+
+
+def now_datetime():
+    """現在日時を返す
+
+    Returns:
+        string: 現在日時（Y-m-d-H-M-S）
+    """
+    return datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')

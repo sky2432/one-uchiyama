@@ -1,9 +1,12 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q, Prefetch
 from .models import Episode, Word
+import datetime
 
+dt_now = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
 
 def top(request):
+    print(dt_now)
     return render(request, 'top.html')
 
 
