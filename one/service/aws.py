@@ -66,13 +66,12 @@ def transcribe_file(job_name, file_uri, vocabulary_name):
         time.sleep(10)
 
 
-def get_transcript_from_s3(url):
+def get_transcript_json_from_s3(url):
     s3 = boto3.resource('s3')
     key = get_s3_file_key_from_s3_url(url)
     object = s3.Object(env.str('AWS_TRANSCRIBE_OUTPUT_BUCKET_NAME'), key)
     body = object.get()['Body'].read()
-    r = json.loads(body)
-    return r['results']['transcripts'][0]['transcript']
+    return json.loads(body)
 
 
 def get_s3_file_key_from_s3_url(url):
@@ -92,3 +91,7 @@ def get_s3_file_key_from_s3_url(url):
     bucket_name = env.str('AWS_TRANSCRIBE_OUTPUT_BUCKET_NAME') + '/'
     start_index = url.find(bucket_name) + len(bucket_name)
     return url[start_index:]
+
+
+def get_transcript_from_json(json):
+    return json['results']['transcripts'][0]['transcript']

@@ -1,6 +1,6 @@
 from django.contrib import admin
-from .models import Radio, Episode, Word, TemporaryWord
-from .service.aws import transcribe_file, get_s3_path_from_url, get_transcript_from_s3
+from .models import Radio, Episode, Word
+from .service.aws import transcribe_file, get_s3_path_from_url, get_transcript_json_from_s3, get_transcript_from_json
 from .service.util import parse
 import uuid
 import environ
@@ -42,9 +42,11 @@ def get_words(episode):
         get_s3_path_from_url(episode.audio_file.url,),
         english_title
     )
-    transcript = get_transcript_from_s3(file_url)
+    transcript_json = get_transcript_json_from_s3(file_url)
+    transcript = get_transcript_from_json(transcript_json)
     words = parse(transcript)
     store_words(words, episode)
+    store_start_time(transcript_json['results']['items'], episode.id)
 
 
 def store_words(words, episode):
@@ -56,7 +58,16 @@ def store_words(words, episode):
         )
 
 
+def store_start_time(items, episode_id):
+    for item in items:
+        words = Word.objects.filter(
+            episode_id=episode_id,
+            original_form__contains=item['alternatives'][0]['content'])
+        if len(words):
+            words[0].start_time = item['start_time']
+            words[0].save()
+
+
 admin.site.register(Radio)
 admin.site.register(Episode, EpisodeAdmin)
 admin.site.register(Word)
-admin.site.register(TemporaryWord)

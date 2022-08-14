@@ -34,7 +34,12 @@
     </div>
     <div class="mt-2">
       {% for word in episode.word_set.all %}
-      <span class="inline-block bg-gray-400 px-2 py-1 rounded-xl text-white mb-1">{{ word.original_form }}</span>
+      <span class="inline-block bg-gray-400 px-2 py-1 rounded-xl text-white mb-1">
+        {{ word.original_form }}
+        {% if word.start_time %}
+        ：{{ word.start_time }}
+        {% endif %}
+      </span>
       {% endfor %}
     </div>
   </div>

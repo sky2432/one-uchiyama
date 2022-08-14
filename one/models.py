@@ -61,14 +61,3 @@ class Word(models.Model):
         episode = self.episode_id
         radio = episode.radio_id
         return radio.title + '#' + str(episode.number) + '：' + self.original_form
-
-
-class TemporaryWord(models.Model):
-    content = models.CharField(verbose_name="内容", max_length=255)
-    start_time = models.CharField(verbose_name="開始時間", max_length=255)
-    created_at = models.DateTimeField(verbose_name="作成日時", auto_now_add=True)
-    updated_at = models.DateTimeField(verbose_name="更新日時", auto_now=True)
-
-    class Meta:
-        verbose_name = "一時単語"
-        verbose_name_plural = "一時単語"
