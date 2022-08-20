@@ -57,10 +57,20 @@ def store_words(words, episode):
 
 
 def store_start_time(items, episode_id):
+    """単語に開始時間を保存する
+
+    Args:
+        items json: 単語のjsonファイル
+        episode_id int: エピソードID
+    """
     for item in items:
+        if 'start_time' not in item:
+            continue
         words = Word.objects.filter(
             episode_id=episode_id,
-            original_form__contains=item['alternatives'][0]['content'])
+            original_form__contains=item['alternatives'][0]['content'],
+            start_time__isnull=True
+        )
         if len(words):
             words[0].start_time = item['start_time']
             words[0].save()
