@@ -4,6 +4,7 @@ $(function () {
    */
   $('.word-badge').click(function () {
     const startTime = $(this).find('.start-time').text();
+    if (!startTime) return;
     const $spotifyPlayer = $(this).parent().prev().find('.spotify-player');
     const src = $spotifyPlayer.attr('src');
     const keyword = '&t=';
