@@ -4,14 +4,6 @@
 {% load static %}
 
 
-{% block meta %}
-<!-- cdn読み込みエラー回避のためにcacheを保存しない -->
-<meta http-equiv="pragma" content="no-cache">
-<meta name="expires" content="0">
-<meta http-equiv="cache-control" content="no-cache, no-store">
-{% endblock meta %}
-
-
 {% block js %}
 <script src="{% static 'js/search.js' %}"></script>
 {% endblock js %}
@@ -32,7 +24,7 @@
   {% else %}
   {% for episode in episodes %}
   <div class="pb-4 mb-4 border-b">
-    <div class="flex">
+    <div class="radio-info flex">
       {% if episode.spotify_id %}
       <iframe class="spotify-player" style="border-radius:12px"
         src="https://open.spotify.com/embed/episode/{{ episode.spotify_id }}?utm_source=generator&t=0" width="100%"
@@ -49,15 +41,20 @@
       </div>
       {% endif %}
     </div>
-    <div class="mt-2">
-      {% for word in episode.word_set.all %}
-      <span class="word-badge inline-block bg-gray-400 px-2 py-1 rounded-xl text-white mb-1 cursor-pointer">
-        {{ word.original_form }}
-        {% if word.start_time %}
-        ：<span class="start-time">{{ word.start_time }}</span>
-        {% endif %}
-      </span>
-      {% endfor %}
+    <div class="words-wrap mt-2">
+      <input type="checkbox" id="switch-{{ episode.id }}" class="hidden peer" />
+      <div class="words overflow-hidden">
+        {% for word in episode.word_set.all %}
+        <span class="word-badge inline-block bg-gray-400 px-2 py-1 rounded-xl text-white mb-1 cursor-pointer">
+          {{ word.original_form }}
+          {% if word.start_time %}
+          ：<span class="start-time">{{ word.start_time }}</span>
+          {% endif %}
+        </span>
+        {% endfor %}
+      </div>
+      <label for="switch-{{ episode.id }}"
+        class="view-more-btn hidden text-center text-gray-500 after:content-['もっと見る'] peer-checked:after:content-['閉じる'] cursor-pointer"></label>
     </div>
   </div>
   {% endfor %}
