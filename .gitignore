@@ -5,4 +5,4 @@ __pycache__/
 db.sqlite3
 db.sqlite3-journal
 node_modules
-static/css/style.css
+/static
