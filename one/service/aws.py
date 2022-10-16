@@ -33,7 +33,8 @@ def transcribe_file(job_name, file_uri, vocabulary_name):
     Returns:
         string: 文字起こしファイルURL
     """
-    transcribe_client = boto3.client('transcribe')
+    # region_nameの指定はNoRegionError対策
+    transcribe_client = boto3.client('transcribe', region_name=env.str('AWS_REGION_NAME'))
 
     transcribe_client.start_transcription_job(
         TranscriptionJobName=job_name,
