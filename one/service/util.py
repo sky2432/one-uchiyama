@@ -1,12 +1,16 @@
 import MeCab
 import datetime
 
+import environ
+
+env = environ.Env()
+env.read_env('.env')
 
 def parse(text):
     # split[]
     # ['名詞', '固有名詞', '組織', '*', '*', '*', '文化放送', 'ブンカホウソウ', 'ブンカホーソー']
     words = []
-    t = MeCab.Tagger('-d /opt/homebrew/lib/mecab/dic/mecab-ipadic-neologd')
+    t = MeCab.Tagger(env.str('MECAB_DIC_PATH'))
     node = t.parseToNode(text)
     while node:
         f = node.feature
