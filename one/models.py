@@ -18,16 +18,15 @@ class Radio(models.Model):
 
 
 class Episode(models.Model):
-    radio_id = models.ForeignKey(
-        Radio, verbose_name="ラジオID", on_delete=models.CASCADE)
-    number = models.PositiveBigIntegerField(verbose_name="回",)
-    audio_file = models.FileField(
-        verbose_name="音声ファイル", upload_to='audio_file')
-    air_date = models.DateField(verbose_name="放送日")
-    spotify_id = models.CharField(
-        verbose_name="SpotifyID", max_length=255, null=True, blank=True)
-    created_at = models.DateTimeField(verbose_name="作成日時", auto_now_add=True)
-    updated_at = models.DateTimeField(verbose_name="更新日時", auto_now=True)
+    radio_id    = models.ForeignKey(Radio, verbose_name="ラジオID", on_delete=models.CASCADE)
+    number      = models.PositiveBigIntegerField(verbose_name="回",)
+    audio_file  = models.FileField(verbose_name="音声ファイル", upload_to='audio_file')
+    air_date    = models.DateField(verbose_name="放送日")
+    spotify_id  = models.CharField(verbose_name="SpotifyID", max_length=255, null=True, blank=True)
+    job_name    = models.CharField(verbose_name="ジョブ名", max_length=255, null=True, blank=True)
+    word_stored = models.BooleanField(verbose_name="単語保存済み", default=False)
+    created_at  = models.DateTimeField(verbose_name="作成日時", auto_now_add=True)
+    updated_at  = models.DateTimeField(verbose_name="更新日時", auto_now=True)
 
     class Meta:
         verbose_name = "エピソード"
@@ -40,7 +39,8 @@ class Episode(models.Model):
         ]
 
     def __str__(self):
-        return str(self.radio_id.title) + '#' + str(self.number)
+        word_stored_str = '保存済み' if self.word_stored else '未保存'
+        return f'{str(self.radio_id.title)}#{str(self.number)} 単語：{word_stored_str}'
 
 
 class Word(models.Model):
@@ -60,4 +60,4 @@ class Word(models.Model):
     def __str__(self):
         episode = self.episode_id
         radio = episode.radio_id
-        return radio.title + '#' + str(episode.number) + '：' + self.original_form
+        return f'{radio.title}#{str(episode.number)}：{self.original_form}'
