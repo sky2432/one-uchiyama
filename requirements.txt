@@ -8,6 +8,4 @@ boto3==1.24.91
 Pillow==9.2.0
 whitenoise==6.2.0
 mecab-python3==1.0.5
-gunicorn==20.1.0
---install-option --no-deps django-heroku==0.3.1
-psycopg2-binary==2.9.4
+psycopg2==2.9.5
