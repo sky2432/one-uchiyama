@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # 環境変数の設定
 
 env = environ.Env()
-env.read_env('.env')
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
