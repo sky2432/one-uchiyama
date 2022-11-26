@@ -1,0 +1,25 @@
+name: remote ssh command
+
+on:
+  push:
+    branches: [develop]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Deploy to VPS
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        key: ${{ secrets.SSH_SECRET_KEY }}
+        port: ${{ secrets.SSH_PORT }}
+        script: |
+          cd /home/user/one-uchiyama
+          git pull origin develop
+          pip install -r requirements.txt
+          python3 manage.py migrate
+          npm run prod
+          python3 manage.py collectstatic --noinput
