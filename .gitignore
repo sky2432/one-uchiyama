@@ -4,5 +4,7 @@ __pycache__/
 .env
 db.sqlite3
 db.sqlite3-journal
-tools/node_modules
-static/css/style.css
+node_modules
+/static
+.venv
+assets/css/style.css

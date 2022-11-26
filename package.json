@@ -1,0 +1,12 @@
+{
+  "name": "one-uchiyama",
+  "private": true,
+  "scripts": {
+    "dev": "npx tailwindcss -i ./assets/css/tailwind.css -o ./assets/css/style.css",
+    "watch": "npx tailwindcss -i ./assets/css/tailwind.css -o ./assets/css/style.css --watch",
+    "prod": "npx tailwindcss -o ./assets/css/style.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.1.4"
+  }
+}

@@ -1,0 +1,11 @@
+Django==4.1.2
+dj-database-url==1.0.0
+django-environ==0.9.0
+django-cleanup==6.0.0
+django-debug-toolbar==3.7.0
+django-storages==1.13.1
+boto3==1.24.91
+Pillow==9.2.0
+whitenoise==6.2.0
+mecab-python3==1.0.5
+psycopg2-binary==2.9.5
