@@ -2,7 +2,7 @@ name: remote ssh command
 
 on:
   push:
-    branches: [develop]
+    branches: [main]
 
 jobs:
   deploy:
@@ -18,8 +18,9 @@ jobs:
         port: ${{ secrets.SSH_PORT }}
         script: |
           cd /home/user/one-uchiyama
-          git pull origin develop
+          git pull origin main
           pip install -r requirements.txt
           python3 manage.py migrate
+          npm ci
           npm run prod
           python3 manage.py collectstatic --noinput
