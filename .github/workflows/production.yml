@@ -17,7 +17,7 @@ jobs:
         key: ${{ secrets.SSH_SECRET_KEY }}
         port: ${{ secrets.SSH_PORT }}
         script: |
-          cd /home/user/one-uchiyama
+          cd ~/one-uchiyama
           git pull origin main
           pip install -r requirements.txt
           python3 manage.py migrate
