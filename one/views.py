@@ -21,8 +21,3 @@ def search(request):
         Q(word__pronunciation__contains=keyword)
     ).distinct()
     return render(request, 'search.html', {'episodes': episodes, 'keyword': keyword})
-
-
-def detail(request, pk):
-    episode = get_object_or_404(Episode, pk=pk)
-    return render(request, 'detail.html', {'episode': episode})
