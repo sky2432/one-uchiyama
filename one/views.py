@@ -13,11 +13,12 @@ def search(request):
     キーワードに部分一致した単語も同時に取得する。
     """
     keyword = request.GET.get('keyword')
-    episodes = Episode.objects.prefetch_related(Prefetch('word_set', queryset=Word.objects.filter(
-        Q(original_form__contains=keyword) |
-        Q(pronunciation__contains=keyword)
-    ))).filter(
-        Q(word__original_form__contains=keyword) |
-        Q(word__pronunciation__contains=keyword)
-    ).distinct()
+    episodes = Episode.objects.order_by('number').reverse().prefetch_related(
+        Prefetch('word_set', queryset=Word.objects.filter(
+            Q(original_form__contains=keyword) |
+            Q(pronunciation__contains=keyword)
+        ))).filter(
+            Q(word__original_form__contains=keyword) |
+            Q(word__pronunciation__contains=keyword)
+        ).distinct()
     return render(request, 'search.html', {'episodes': episodes, 'keyword': keyword})
