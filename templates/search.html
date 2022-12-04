@@ -48,7 +48,10 @@
         <span class="word-badge inline-block bg-gray-400 px-2 py-1 rounded-xl text-white mb-1 cursor-pointer">
           {{ word.original_form }}
           {% if word.start_time %}
-          ：<span class="start-time">{{ word.start_time }}</span>
+          ：
+          <span>{{ word.start_time_minutes }}</span>
+          <!-- 単語を押した時の開始時間設定に使用している -->
+          <span class="start-time hidden">{{ word.start_time }}</span>
           {% endif %}
         </span>
         {% endfor %}

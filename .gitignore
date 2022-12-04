@@ -5,6 +5,5 @@ __pycache__/
 db.sqlite3
 db.sqlite3-journal
 node_modules
-/static
 .venv
 assets/css/style.css

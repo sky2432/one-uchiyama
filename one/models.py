@@ -48,7 +48,7 @@ class Word(models.Model):
         Episode, verbose_name="エピソードID", on_delete=models.CASCADE)
     original_form = models.CharField(verbose_name="原形", max_length=255)
     pronunciation = models.CharField(verbose_name="読み", max_length=255)
-    start_time = models.CharField(
+    start_time = models.FloatField(
         verbose_name="開始時間", max_length=255, null=True, blank=True)
     created_at = models.DateTimeField(verbose_name="作成日時", auto_now_add=True)
     updated_at = models.DateTimeField(verbose_name="更新日時", auto_now=True)
