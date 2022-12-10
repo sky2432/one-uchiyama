@@ -3,7 +3,7 @@ from django.db.models import Q
 from django.contrib import messages
 from .models import Radio, Episode, Word
 from .service.aws import transcribe_file, get_s3_path_from_url, get_transcript_json_from_s3, get_transcript_from_json, get_transcript_file_url
-from .service.util import parse, now_datetime
+from .service.util import parse, now_datetime, is_hiragana
 import environ
 
 env = environ.Env()
@@ -58,7 +58,7 @@ class EpisodeAdmin(admin.ModelAdmin):
     def store_words_again_action(self, request, queryset):
         # 単語未保存のエピソードが含まれていれば実行しない
         for episode in queryset:
-            if episode.word_stored is False:
+            if not episode.word_stored:
                 messages.warning(request, '単語未保存のエピソードがあります。')
                 return
         for episode in queryset:
@@ -131,15 +131,26 @@ def store_start_time(items, episode_id):
         episode_id (int): エピソードID
     """
     for item in items:
+        # start_timeのキーがなければスキップ
         if 'start_time' not in item:
             continue
+
+        # 単語を取得
+        content = item['alternatives'][0]['content']
+
+        # 2文字以下の「ひらがな」はスキップ
+        if (len(content) <= 2 and is_hiragana(content)):
+            continue
+
         # 原型または読みに部分一致
-        # ひらがなの1文字はスキップ
-        words = Word.objects.filter(
+        words = Word.objects.order_by('id').filter(
             episode_id=episode_id,
-            original_form__contains=item['alternatives'][0]['content'],
             start_time__isnull=True
+        ).filter(
+            Q(original_form__contains=content) |
+            Q(pronunciation__contains=content)
         )
+        # 一致する最初の単語に開始時間を設定する
         if len(words):
             words[0].start_time = item['start_time']
             words[0].save()
