@@ -1,16 +1,17 @@
 from django.contrib import admin
+from django.db.models import Q
+from django.contrib import messages
 from .models import Radio, Episode, Word
 from .service.aws import transcribe_file, get_s3_path_from_url, get_transcript_json_from_s3, get_transcript_from_json, get_transcript_file_url
 from .service.util import parse, now_datetime
 import environ
-from django.contrib import messages
 
 env = environ.Env()
 env.read_env('.env')
 
 
 class EpisodeAdmin(admin.ModelAdmin):
-    actions = ['store_words_action']
+    actions = ['store_words_action', 'store_words_again_action']
     readonly_fields = ['word_stored']
 
     def save_model(self, request, obj, form, change):
@@ -47,13 +48,28 @@ class EpisodeAdmin(admin.ModelAdmin):
         # 単語保存済みエピソードが含まれていれば実行しない
         for episode in queryset:
             if episode.word_stored:
-                messages.warning(request, '単語保存済みのエピソードがあります')
+                messages.warning(request, '単語保存済みのエピソードがあります。')
                 return
         # 単語保存
-        for obj in queryset:
-            transcribe(obj, request)
+        for episode in queryset:
+            transcribe(episode, request)
 
-    store_words_action.short_description = '単語を保存する'
+
+    def store_words_again_action(self, request, queryset):
+        # 単語未保存のエピソードが含まれていれば実行しない
+        for episode in queryset:
+            if episode.word_stored is False:
+                messages.warning(request, '単語未保存のエピソードがあります。')
+                return
+        for episode in queryset:
+            print(episode.id)
+            # 既存の単語を削除
+            Word.objects.filter(episode_id=episode.id).delete()
+            # 単語保存
+            transcribe(episode, request)
+
+    store_words_action.short_description = '初回単語保存'
+    store_words_again_action.short_description = '再単語保存'
 
 
 def set_word_stored(episode, stored: bool):
@@ -117,6 +133,8 @@ def store_start_time(items, episode_id):
     for item in items:
         if 'start_time' not in item:
             continue
+        # 原型または読みに部分一致
+        # ひらがなの1文字はスキップ
         words = Word.objects.filter(
             episode_id=episode_id,
             original_form__contains=item['alternatives'][0]['content'],
