@@ -161,11 +161,11 @@ def transcribe(episode: Episode, request: WSGIRequest) -> None:
     set_word_stored(episode , True)
 
 
-def store_words(words: List[dict[str]], episode: Episode) -> None:
+def store_words(words: List[Dict[str, str]], episode: Episode) -> None:
     """エピソードに単語を保存する
 
     Args:
-        words (List[dict]): 形態素解析で取得した単語リスト
+        words (List[Dict[str, str]]): 形態素解析で取得した単語リスト
         episode (Episode): Episodeモデル
     """
     for word in words:
