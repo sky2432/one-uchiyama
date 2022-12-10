@@ -1,13 +1,22 @@
 import MeCab
 import datetime
 import re
-
 import environ
+
+from typing import List, Dict
 
 env = environ.Env()
 env.read_env('.env')
 
-def parse(text):
+def parse(text: str) -> List[Dict[str, str]]:
+    """mecabを用いて文章を形態素解析し、単語リストを取得する
+
+    Args:
+        text (str): 文章
+
+    Returns:
+        List[Dict[str, str]]: 単語の原型と読みで構成された辞書のリスト
+    """
     # split[]
     # 表層形\t品詞,品詞細分類1,品詞細分類2,品詞細分類3,活用型,活用形,原形,読み,発音
     # ['名詞', '固有名詞', '組織', '*', '*', '*', '文化放送', 'ブンカホウソウ', 'ブンカホーソー']
@@ -45,15 +54,23 @@ def parse(text):
     return words
 
 
-def now_datetime():
-    """現在日時を返す
+def now_datetime() -> str:
+    """現在日時をフォーマットした文字列で返す
 
     Returns:
-        string: 現在日時（Y-m-d-H-M-S）
+        str: 現在日時（Y-m-d-H-M-S）
     """
     return datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
 
 
-def is_hiragana(text):
+def is_hiragana(text: str) -> bool:
+    """対象の文字列が全て「ひらがな」か判定する
+
+    Args:
+        text (str): 文字列
+
+    Returns:
+        bool: ひらがな: True, ひらがな以外: False
+    """
     p = re.compile('[\u3041-\u309F]+')
     return p.fullmatch(text) is not None

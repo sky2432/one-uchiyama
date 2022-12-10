@@ -2,18 +2,20 @@ import boto3
 import environ
 import json
 
+from typing import Union, Dict
+
 env = environ.Env()
 env.read_env('.env')
 
 
-def get_s3_path_from_url(url):
+def get_s3_path_from_url(url: str) -> str:
     """S3URLからS3パスを取得する
 
     Args:
-        url (string) :S3URL
+        url (str) :S3URL
 
     Returns:
-        string: S3パス
+        str: S3パス
     """
     domain = 's3.amazonaws.com'
     start_index = url.find(domain) + len(domain)
@@ -21,13 +23,13 @@ def get_s3_path_from_url(url):
     return 's3://' + env.str('AWS_STORAGE_BUCKET_NAME') + url[start_index:end_index]
 
 
-def transcribe_file(job_name, file_uri, vocabulary_name):
+def transcribe_file(job_name: str, file_uri: str, vocabulary_name: str) -> None:
     """音声ファイルを文字起こしする
 
     Args:
-        job_name (string): ジョブ名
-        file_uri (string): 対象音声ファイルのs3ファイルパス
-        vocabulary_name (string): ボキャブラリー名
+        job_name (str): ジョブ名
+        file_uri (str): 対象音声ファイルのs3ファイルパス
+        vocabulary_name (str): ボキャブラリー名
     """
     transcribe_client().start_transcription_job(
         TranscriptionJobName=job_name,
@@ -40,7 +42,15 @@ def transcribe_file(job_name, file_uri, vocabulary_name):
     )
 
 
-def get_transcript_file_url(job_name):
+def get_transcript_file_url(job_name: str) -> Union[str, None]:
+    """文字起こしファイルURLを取得する
+
+    Args:
+        job_name (str): transcribeジョブ名
+
+    Returns:
+        Union[str, None]: ファイルがある時: URL, ファイルがないとき: None
+    """
     job = transcribe_client().get_transcription_job(TranscriptionJobName=job_name)
     job_status = job['TranscriptionJob']['TranscriptionJobStatus']
 
@@ -63,7 +73,15 @@ def transcribe_client():
     return boto3.client('transcribe', region_name=env.str('AWS_REGION_NAME'))
 
 
-def get_transcript_json_from_s3(url):
+def get_transcript_json_from_s3(url: str) -> Dict[str, str]:
+    """s3から文字起こしファイルをjsonとして取得する
+
+    Args:
+        url (str): s3ファイルURL
+
+    Returns:
+        Dict[str, str]: 文字起こし結果のjson
+    """
     s3 = boto3.resource('s3')
     key = get_s3_file_key_from_s3_url(url)
     object = s3.Object(env.str('AWS_TRANSCRIBE_OUTPUT_BUCKET_NAME'), key)
@@ -71,7 +89,7 @@ def get_transcript_json_from_s3(url):
     return json.loads(body)
 
 
-def get_s3_file_key_from_s3_url(url):
+def get_s3_file_key_from_s3_url(url: str) -> str:
     """S3URLからファイルキーを取得する
 
     example:
@@ -80,15 +98,23 @@ def get_s3_file_key_from_s3_url(url):
     return 'transcribe_file/one-uchiyama_0_a12bf05c-81a8-4afd-8f71-b0088ecc8cff.json'
 
     Args:
-        url (string): S3URL
+        url (str): S3URL
 
     Returns:
-        string: S3ファイルキー
+        str: S3ファイルキー
     """
     bucket_name = env.str('AWS_TRANSCRIBE_OUTPUT_BUCKET_NAME') + '/'
     start_index = url.find(bucket_name) + len(bucket_name)
     return url[start_index:]
 
 
-def get_transcript_from_json(json):
+def get_transcript_from_json(json: Dict[str, str]) -> str:
+    """文字行し結果jsonから文字起こし文章を取得する
+
+    Args:
+        json (Dict[str, str]): 文字行し結果json
+
+    Returns:
+        str: 文字起こし文章
+    """
     return json['results']['transcripts'][0]['transcript']

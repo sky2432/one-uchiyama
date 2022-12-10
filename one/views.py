@@ -3,23 +3,34 @@ from django.db.models import Q, Prefetch
 from .models import Episode, Word
 import math
 
-def top(request):
+from django.db.models.query import QuerySet
+from django.core.handlers.wsgi import WSGIRequest
+from django.http.response import HttpResponse
+
+def top(request: WSGIRequest) -> HttpResponse:
     """_summary_
 
     Args:
-        request (_type_): _description_
+        request (WSGIRequest): Djangoリクエスト
 
     Returns:
-        _type_: _description_
+        HttpResponse: Djangoレスポンス
     """
     return render(request, 'top.html')
 
 
-def search(request):
+def search(request: WSGIRequest) -> HttpResponse:
     """キーワードで回を検索する。
 
     キーワードに部分一致した単語も同時に取得する。
+
+    Args:
+        request (WSGIRequest): Djangoリクエスト
+
+    Returns:
+        HttpResponse: Djangoレスポンス
     """
+    print(type(request))
     keyword = request.GET.get('keyword')
     episodes = Episode.objects.order_by('number').reverse().prefetch_related(
         Prefetch('word_set', queryset=Word.objects.order_by('start_time').filter(
@@ -33,15 +44,14 @@ def search(request):
     return render(request, 'search.html', {'episodes': episodes, 'keyword': keyword})
 
 
-def __add_start_time_minutes(episodes):
+def __add_start_time_minutes(episodes: QuerySet) -> QuerySet:
     """分単位の開始時間（00:00形式）を単語に追加する
 
     Args:
-        episodes (QuerySet[Episode]): Word情報を含んだEpisodeモデルのリスト
+        episodes (QuerySet): Word情報を含んだEpisodeモデルのリスト
     Returns:
-        QuerySet[Episode]: Episodeモデルのリスト
+        QuerySet: Episodeモデルのリスト
     """
-    print(type(episodes))
     for episode in episodes:
         for word in episode.word_set.all():
             time_float = word.start_time
