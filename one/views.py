@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.db.models import Q, Prefetch
+from django.core.paginator import Paginator
 from .models import Episode, Word
 import math
 
@@ -8,7 +9,7 @@ from django.core.handlers.wsgi import WSGIRequest
 from django.http.response import HttpResponse
 
 def top(request: WSGIRequest) -> HttpResponse:
-    """_summary_
+    """トップページを表示する
 
     Args:
         request (WSGIRequest): Djangoリクエスト
@@ -20,7 +21,7 @@ def top(request: WSGIRequest) -> HttpResponse:
 
 
 def search(request: WSGIRequest) -> HttpResponse:
-    """キーワードで回を検索する。
+    """キーワードで回を検索する
 
     キーワードに部分一致した単語も同時に取得する。
 
@@ -30,8 +31,11 @@ def search(request: WSGIRequest) -> HttpResponse:
     Returns:
         HttpResponse: Djangoレスポンス
     """
-    print(type(request))
     keyword = request.GET.get('keyword')
+    # Noneチェック
+    if not keyword:
+        keyword = ''
+
     episodes = Episode.objects.order_by('number').reverse().prefetch_related(
         Prefetch('word_set', queryset=Word.objects.order_by('start_time').filter(
             Q(original_form__contains=keyword) |
@@ -41,6 +45,15 @@ def search(request: WSGIRequest) -> HttpResponse:
             Q(word__pronunciation__contains=keyword)
         ).distinct()
     episodes = __add_start_time_minutes(episodes)
+
+    # ページネーション
+    paginator = Paginator(episodes, 1)
+    page_num = request.GET.get('page', 1)
+    try:
+        episodes = paginator.page(page_num)
+    except Exception:
+        episodes = paginator.page(1)
+
     return render(request, 'search.html', {'episodes': episodes, 'keyword': keyword})
 
 
