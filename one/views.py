@@ -47,7 +47,8 @@ def search(request: WSGIRequest) -> HttpResponse:
     episodes = __add_start_time_minutes(episodes)
 
     # ページネーション
-    paginator = Paginator(episodes, 1)
+    per_page = 5
+    paginator = Paginator(episodes, per_page)
     page_num = request.GET.get('page', 1)
     try:
         episodes = paginator.page(page_num)
