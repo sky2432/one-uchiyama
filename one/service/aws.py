@@ -69,7 +69,13 @@ def get_transcript_file_url(job_name: str) -> Union[str, None]:
 
 
 def transcribe_client():
-    # region_nameの指定はNoRegionError対策
+    """transcribeのboto3クライアント
+
+    region_nameの指定はNoRegionError対策
+
+    Returns:
+        Any: boto3.client
+    """
     return boto3.client('transcribe', region_name=env.str('AWS_REGION_NAME'))
 
 
