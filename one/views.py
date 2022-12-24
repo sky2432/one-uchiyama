@@ -3,6 +3,7 @@ from django.db.models import Q, Prefetch
 from django.core.paginator import Paginator
 from .models import Episode, Word
 import math
+from .service.util import is_hiragana , hira_to_kata
 
 from django.db.models.query import QuerySet
 from django.core.handlers.wsgi import WSGIRequest
@@ -37,13 +38,18 @@ def search(request: WSGIRequest) -> HttpResponse:
     if not keyword:
         keyword = ''
 
+    # ひらがなをカタカナに変換
+    search_word = keyword
+    if is_hiragana(keyword):
+        search_word = hira_to_kata(keyword)
+
     episodes = Episode.objects.order_by('number').reverse().prefetch_related(
         Prefetch('word_set', queryset=Word.objects.order_by('start_time').filter(
-            Q(original_form__contains=keyword) |
-            Q(pronunciation__contains=keyword)
+            Q(original_form__contains=search_word) |
+            Q(pronunciation__contains=search_word)
         ))).filter(
-            Q(word__original_form__contains=keyword) |
-            Q(word__pronunciation__contains=keyword)
+            Q(word__original_form__contains=search_word) |
+            Q(word__pronunciation__contains=search_word)
         ).distinct()
     episodes = __add_start_time_minutes(episodes)
 

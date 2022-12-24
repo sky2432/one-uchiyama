@@ -74,3 +74,16 @@ def is_hiragana(text: str) -> bool:
     """
     p = re.compile('[\u3041-\u309F]+')
     return p.fullmatch(text) is not None
+
+
+def hira_to_kata(str: str) -> str:
+    """ひらがなをカタカナに変換する
+
+    Args:
+        str (str): ひらがな
+
+    Returns:
+        str: カタカナ
+    """
+    unicode_point_diff = 96
+    return ''.join([chr(ord(s) + unicode_point_diff) for s in str])
