@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from django.shortcuts import render
 from django.db.models import Q, Prefetch
 from django.core.paginator import Paginator
@@ -11,6 +9,7 @@ from .service.util import is_hiragana
 from django.db.models.query import QuerySet
 from django.core.handlers.wsgi import WSGIRequest
 from django.http.response import HttpResponse
+from typing import Union
 
 def top(request: WSGIRequest) -> HttpResponse:
     """トップページを表示する
@@ -35,7 +34,7 @@ def search(request: WSGIRequest) -> HttpResponse:
     Returns:
         HttpResponse: Djangoレスポンス
     """
-    keyword: str | None = request.GET.get('keyword')
+    keyword: Union[str, None] = request.GET.get('keyword')
     # Noneチェック
     if keyword is None:
         keyword = ''
