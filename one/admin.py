@@ -8,7 +8,6 @@ import environ
 
 from django.core.handlers.wsgi import WSGIRequest
 from django.db.models.query import QuerySet
-from typing import List, Dict
 
 env = environ.Env()
 env.read_env('.env')
@@ -161,11 +160,11 @@ def transcribe(episode: Episode, request: WSGIRequest) -> None:
     set_word_stored(episode , True)
 
 
-def store_words(words: List[Dict[str, str]], episode: Episode) -> None:
+def store_words(words: list[dict[str, str]], episode: Episode) -> None:
     """エピソードに単語を保存する
 
     Args:
-        words (List[Dict[str, str]]): 形態素解析で取得した単語リスト
+        words (list[dict[str, str]]): 形態素解析で取得した単語リスト
         episode (Episode): Episodeモデル
     """
     for word in words:
@@ -176,11 +175,11 @@ def store_words(words: List[Dict[str, str]], episode: Episode) -> None:
         )
 
 
-def store_start_time(items: List[Dict[str, str]], episode_id: int) -> None:
+def store_start_time(items: list[dict[str, str]], episode_id: int) -> None:
     """単語に開始時間を保存する
 
     Args:
-        items (List[Dict[str, str]]): 単語のjsonファイル
+        items (list[dict[str, str]]): 単語のjsonファイル
         episode_id (int): エピソードID
     """
     for item in items:
