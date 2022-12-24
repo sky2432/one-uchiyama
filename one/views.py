@@ -6,7 +6,7 @@ from django.core.paginator import Paginator
 from .models import Episode, Word
 import math
 import jaconv
-from one.service.util import is_hiragana
+from .service.util import is_hiragana
 
 from django.db.models.query import QuerySet
 from django.core.handlers.wsgi import WSGIRequest
