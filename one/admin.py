@@ -114,7 +114,7 @@ def start_transcript_job(episode: Episode) -> None:
         episode (Episode): Episodeモデル
     """
     english_title = episode.radio_id.english_title
-    job_name = english_title + '_' + str(episode.number) + '_' + now_datetime()
+    job_name = english_title + '_' + env.str('APP_ENV') + '_' + str(episode.number) + '_' + now_datetime()
     transcribe_file(job_name, get_s3_path_from_url(episode.audio_file.url), english_title)
     # ジョブ名を保存
     store_job_name(episode.id, job_name)
