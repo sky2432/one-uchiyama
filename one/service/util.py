@@ -3,17 +3,19 @@ import datetime
 import re
 import environ
 
+from typing import List, Dict
+
 env = environ.Env()
 env.read_env('.env')
 
-def parse(text: str) -> list[dict[str, str]]:
+def parse(text: str) -> List[Dict[str, str]]:
     """mecabを用いて文章を形態素解析し、単語リストを取得する
 
     Args:
         text (str): 文章
 
     Returns:
-        list[dict[str, str]]: 単語の原型と読みで構成された辞書のリスト
+        List[Dict[str, str]]: 単語の原型と読みで構成された辞書のリスト
     """
     # split[]
     # 表層形\t品詞,品詞細分類1,品詞細分類2,品詞細分類3,活用型,活用形,原形,読み,発音
