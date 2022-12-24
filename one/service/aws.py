@@ -2,7 +2,7 @@ import boto3
 import environ
 import json
 
-from typing import Union
+from typing import Union, Dict
 
 env = environ.Env()
 env.read_env('.env')
@@ -79,14 +79,14 @@ def transcribe_client():
     return boto3.client('transcribe', region_name=env.str('AWS_REGION_NAME'))
 
 
-def get_transcript_json_from_s3(url: str) -> dict[str, str]:
+def get_transcript_json_from_s3(url: str) -> Dict[str, str]:
     """s3から文字起こしファイルをjsonとして取得する
 
     Args:
         url (str): s3ファイルURL
 
     Returns:
-        dict[str, str]: 文字起こし結果のjson
+        Dict[str, str]: 文字起こし結果のjson
     """
     s3 = boto3.resource('s3')
     key = get_s3_file_key_from_s3_url(url)
@@ -114,11 +114,11 @@ def get_s3_file_key_from_s3_url(url: str) -> str:
     return url[start_index:]
 
 
-def get_transcript_from_json(json: dict[str, str]) -> str:
+def get_transcript_from_json(json: Dict[str, str]) -> str:
     """文字行し結果jsonから文字起こし文章を取得する
 
     Args:
-        json (dict[str, str]): 文字行し結果json
+        json (Dict[str, str]): 文字行し結果json
 
     Returns:
         str: 文字起こし文章
