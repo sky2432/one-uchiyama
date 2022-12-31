@@ -141,24 +141,12 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# AWS
-AWS_ACCESS_KEY_ID = env.str('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = env.str('AWS_SECRET_ACCESS_KEY')
-
-# AWS S3（未使用）
-# DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-# AWS_STORAGE_BUCKET_NAME = env.str('AWS_STORAGE_BUCKET_NAME')
-# AWS_S3_REGION_NAME = env.str('AWS_REGION_NAME')
-
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
 
 # Google認証
-from google.oauth2 import service_account
-GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
-    env.str('GS_CREDENTIALS_FILE_PATH')
-)
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = env.str('G_CREDENTIALS_FILE_PATH')
 # GoogleCloudStorage settings
 DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 GS_BUCKET_NAME = env.str('GS_BUCKET_NAME')
