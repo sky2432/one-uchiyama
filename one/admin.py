@@ -2,14 +2,15 @@ from django.contrib import admin
 from django.db.models import Q
 from django.contrib import messages
 from .models import Radio, Episode, Word
-from .service.aws import transcribe_file, get_s3_path_from_url, get_transcript_json_from_s3, get_transcript_from_json, get_transcript_file_url
 from .service.util import parse, now_datetime, is_hiragana
-import environ
+from .service.google import transcribe_gcs, get_gcs_uri, get_transcript_result
+from google.api_core.exceptions import NotFound
 
 from django.core.handlers.wsgi import WSGIRequest
 from django.db.models.query import QuerySet
 from typing import List, Dict
 
+import environ
 env = environ.Env()
 env.read_env('.env')
 
@@ -60,7 +61,6 @@ class EpisodeAdmin(admin.ModelAdmin):
             request (WSGIRequest): Djangoリクエスト
             queryset (QuerySet): Episodeオブジェクト
         """
-        print(type(request), type(queryset))
         # 単語保存済みエピソードが含まれていれば実行しない
         for episode in queryset:
             if episode.word_stored:
@@ -68,8 +68,8 @@ class EpisodeAdmin(admin.ModelAdmin):
                 return
         # 単語保存
         for episode in queryset:
-            transcribe(episode, request)
-            messages.success(request, '単語の保存が完了しました')
+            if transcribe(episode, request):
+                messages.success(request, '単語の保存が完了しました')
 
     def store_words_again_action(self, request: WSGIRequest, queryset: QuerySet) -> None:
         """単語を再保存する
@@ -84,12 +84,11 @@ class EpisodeAdmin(admin.ModelAdmin):
                 messages.warning(request, '単語未保存のエピソードがあります。')
                 return
         for episode in queryset:
-            print(episode.id)
             # 既存の単語を削除
             Word.objects.filter(episode_id=episode.id).delete()
             # 単語保存
-            transcribe(episode, request)
-            messages.success(request, '単語の再保存が完了しました')
+            if transcribe(episode, request):
+                messages.success(request, '単語の再保存が完了しました')
 
 
     store_words_action.short_description = '初回単語保存'
@@ -113,11 +112,27 @@ def start_transcript_job(episode: Episode) -> None:
     Args:
         episode (Episode): Episodeモデル
     """
-    english_title = episode.radio_id.english_title
-    job_name = english_title + '_' + env.str('APP_ENV') + '_' + str(episode.number) + '_' + now_datetime()
-    transcribe_file(job_name, get_s3_path_from_url(episode.audio_file.url), english_title)
+    audio_gcs_uri = get_gcs_uri(episode.audio_file)
+    file_path = get_transcript_file_path(episode)
+    transcribe_gcs(audio_gcs_uri, file_path)
     # ジョブ名を保存
-    store_job_name(episode.id, job_name)
+    store_job_name(episode.id, file_path)
+
+
+def get_transcript_file_path(episode: Episode) -> str:
+    """GCSバケットルートからの文字起こしファイルパスを取得する
+
+    Args:
+        episode (Episode): Episodeモデル
+
+    Returns:
+        str: 文字起こしファイルパス
+    """
+    file_name = str(episode.number) + '_' + now_datetime() + '.json'
+    sub_folder_name = episode.radio_id.english_title
+    transcript_folder_name = 'transcript_file/' + sub_folder_name
+    file_path = transcript_folder_name + '/' + file_name
+    return file_path
 
 
 def store_job_name(episodeId: int, job_name: str) -> None:
@@ -132,34 +147,40 @@ def store_job_name(episodeId: int, job_name: str) -> None:
     episode.save()
 
 
-def transcribe(episode: Episode, request: WSGIRequest) -> None:
-    """aws transcribeで文字起こししたファイルをmecabで解析し単語として保存する
+def transcribe(episode: Episode, request: WSGIRequest) -> bool:
+    """Google speech-to-textで文字起こししたファイルをmecabで解析し単語として保存する
 
     Args:
         episode (Episode): Episodeモデル
         request (WSGIRequest): Djangoリクエスト
+    Returns:
+        bool: 成功かどうか
     """
     episode = Episode.objects.get(id=episode.id)
 
-    # 文字起こしファイルのURLを取得
-    file_url = get_transcript_file_url(episode.job_name)
-    if not file_url:
-        messages.warning(request, '文字起こしが未完了です。時間を置いてから再度実行してください。')
-        return
-
-    # URLを元にS3からjsonファイルを取得
-    transcript_json = get_transcript_json_from_s3(file_url)
-    transcript = get_transcript_from_json(transcript_json)
+    # GSからjsonファイルを取得
+    try:
+        transcript_json = get_transcript_result(episode.job_name)
+    except NotFound:
+        messages.warning(request, '文字起こしが未完了です。時間を置いてから再度実行してください')
+        return False
+    except Exception:
+        messages.warning(request, '文字起こしでエラーが発生しました')
+        return False
+    # 文字起こし本文と単語の開始時間リストを取得
+    alternative = transcript_json['results'][0]['alternatives'][0]
+    transcript = alternative['transcript']
+    items = alternative['words']
 
     # 文字起こし文を形態素解析し、単語として保存する
     words = parse(transcript)
     store_words(words, episode)
     # 単語に開始時間を設定
-    store_start_time(transcript_json['results']['items'], episode.id)
+    store_start_time(items, episode.id)
 
     # エピソードを「単語保存済み」にする
     set_word_stored(episode , True)
-
+    return True
 
 def store_words(words: List[Dict[str, str]], episode: Episode) -> None:
     """エピソードに単語を保存する
@@ -185,14 +206,17 @@ def store_start_time(items: List[Dict[str, str]], episode_id: int) -> None:
     """
     for item in items:
         # start_timeのキーがなければスキップ
-        if 'start_time' not in item:
+        if 'startTime' not in item:
             continue
 
         # 単語を取得
-        content = item['alternatives'][0]['content']
+        word_split = item['word'].split('|')
+        original_word = word_split[0]
+        # 発音はない可能性あり
+        pronunciation = word_split[1] if len(word_split) == 2 else original_word
 
         # 2文字以下の「ひらがな」はスキップ
-        if (len(content) <= 2 and is_hiragana(content)):
+        if (len(original_word) <= 2 and is_hiragana(original_word)):
             continue
 
         # 原型または読みに部分一致
@@ -200,12 +224,13 @@ def store_start_time(items: List[Dict[str, str]], episode_id: int) -> None:
             episode_id=episode_id,
             start_time__isnull=True
         ).filter(
-            Q(original_form__contains=content) |
-            Q(pronunciation__contains=content)
+            Q(original_form__contains=original_word) |
+            Q(pronunciation__contains=pronunciation)
         )
         # 一致する最初の単語に開始時間を設定する
         if len(words):
-            words[0].start_time = item['start_time']
+            # 開始時間からsを除去（例: 0s -> 0）
+            words[0].start_time = item['startTime'].replace('s', '')
             words[0].save()
 
 
