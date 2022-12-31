@@ -9,3 +9,6 @@ Pillow==9.2.0
 whitenoise==6.2.0
 mecab-python3==1.0.5
 psycopg2-binary==2.9.5
+google-auth==2.15.0
+google-cloud-storage==2.7.0
+google-cloud-speech==2.16.2

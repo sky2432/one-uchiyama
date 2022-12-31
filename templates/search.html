@@ -47,7 +47,7 @@
         {% for word in episode.word_set.all %}
         <span class="word-badge inline-block bg-gray-400 px-2 py-1 rounded-xl text-white mb-1 cursor-pointer">
           {{ word.original_form }}
-          {% if word.start_time %}
+          {% if word.start_time is not None %}
           ：
           <span>{{ word.start_time_minutes }}</span>
           <!-- 単語を押した時の開始時間設定に使用している -->
